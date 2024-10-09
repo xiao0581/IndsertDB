@@ -9,10 +9,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IndsertDB.Model
 {
    
-    [Table("Peoples")]
+   
     public class People
     {
-        [Key]
+  
         public string Nconst { get; set; }  // 主键
 
         public string PrimaryName { get; set; }

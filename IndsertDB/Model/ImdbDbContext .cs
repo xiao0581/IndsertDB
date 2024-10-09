@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace IndsertDB.Model
 {
-    using Microsoft.EntityFrameworkCore;
-
-    namespace IndsertDB.Model
-    {
+   
         public class ImdbDbContext : DbContext
         {
+
+
+
             public DbSet<People> Peoples { get; set; }
             public DbSet<Movie> Movies { get; set; }
             public DbSet<Profession> Professions { get; set; }
@@ -33,82 +33,119 @@ namespace IndsertDB.Model
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
-                // People: 主键
-                modelBuilder.Entity<People>()
-                    .HasKey(p => p.Nconst);
+                // People table mapping
+                modelBuilder.Entity<People>(entity =>
+                {
+                    entity.ToTable("Peoples");
+                    entity.HasKey(p => p.Nconst);
+                    entity.Property(p => p.Nconst).HasColumnName("nconst");
+                    entity.Property(p => p.PrimaryName).HasColumnName("primaryName");
+                    entity.Property(p => p.BirthYear).HasColumnName("birthYear");
+                    entity.Property(p => p.DeathYear).HasColumnName("deathYear");
+                });
 
-                // PersonProfessions: 联合主键
-                modelBuilder.Entity<PersonProfession>()
-                    .HasKey(pp => new { pp.Nconst, pp.ProfessionId });
+                // Movies table mapping
+                modelBuilder.Entity<Movie>(entity =>
+                {
+                    entity.ToTable("Movies");
+                    entity.HasKey(m => m.Tconst);
+                    entity.Property(m => m.Tconst).HasColumnName("tconst");
+                    entity.Property(m => m.TitleType).HasColumnName("titleType");
+                    entity.Property(m => m.PrimaryTitle).HasColumnName("primaryTitle");
+                    entity.Property(m => m.OriginalTitle).HasColumnName("originalTitle");
+                    entity.Property(m => m.IsAdult).HasColumnName("isAdult");
+                    entity.Property(m => m.StartYear).HasColumnName("startYear");
+                    entity.Property(m => m.EndYear).HasColumnName("endYear");
+                    entity.Property(m => m.RuntimeMinutes).HasColumnName("runtimeMinutes");
+                });
 
-                modelBuilder.Entity<PersonProfession>()
-                    .HasOne(pp => pp.People)
-                    .WithMany(p => p.PersonProfessions)
-                    .HasForeignKey(pp => pp.Nconst);
+                // Professions table mapping
+                modelBuilder.Entity<Profession>(entity =>
+                {
+                    entity.ToTable("Professions");
+                    entity.HasKey(p => p.ProfessionId);
+                    entity.Property(p => p.ProfessionId).HasColumnName("professionId");
+                    entity.Property(p => p.ProfessionName).HasColumnName("professionName");
+                });
 
-                modelBuilder.Entity<PersonProfession>()
-                    .HasOne(pp => pp.Professions)
-                    .WithMany(p => p.PersonProfessions)
-                    .HasForeignKey(pp => pp.ProfessionId);
+                // PersonProfessions table mapping
+                modelBuilder.Entity<PersonProfession>(entity =>
+                {
+                    entity.ToTable("PersonProfessions");
 
-                // KnownFor: 联合主键
-                modelBuilder.Entity<KnownFor>()
-                    .HasKey(kf => new { kf.Nconst, kf.Tconst });
+                    entity.HasKey(pp => new { pp.Nconst, pp.ProfessionId });
 
-                modelBuilder.Entity<KnownFor>()
-                    .HasOne(kf => kf.People)
-                    .WithMany(p => p.KnownForTitles)
-                    .HasForeignKey(kf => kf.Nconst);
+                    entity.HasOne(pp => pp.People)
+                          .WithMany(p => p.PersonProfessions)
+                          .HasForeignKey(pp => pp.Nconst);
 
-                modelBuilder.Entity<KnownFor>()
-                    .HasOne(kf => kf.Movies)
-                    .WithMany(m => m.KnownForTitles)
-                    .HasForeignKey(kf => kf.Tconst);
+                    entity.HasOne(pp => pp.Profession)
+                          .WithMany(p => p.PersonProfessions)
+                          .HasForeignKey(pp => pp.ProfessionId);
+                });
 
-                // MovieGenre: 联合主键
-                modelBuilder.Entity<MovieGenre>()
-                    .HasKey(mg => new { mg.Tconst, mg.GenreId });
+                // KnownFor table mapping
+                modelBuilder.Entity<KnownFor>(entity =>
+                {
+                    entity.ToTable("KnownFors");
+                    entity.HasKey(kf => new { kf.Nconst, kf.Tconst });
+                    entity.HasOne(kf => kf.People)
+                          .WithMany(p => p.KnownForTitles)
+                          .HasForeignKey(kf => kf.Nconst);
+                    entity.HasOne(kf => kf.Movie)
+                          .WithMany(m => m.KnownForTitles)
+                          .HasForeignKey(kf => kf.Tconst);
+                });
 
-                modelBuilder.Entity<MovieGenre>()
-                    .HasOne(mg => mg.Movies)
-                    .WithMany(m => m.MovieGenres)
-                    .HasForeignKey(mg => mg.Tconst);
+                // Genres table mapping
+                modelBuilder.Entity<Genre>(entity =>
+                {
+                    entity.ToTable("Genres");
+                    entity.HasKey(g => g.GenreId);
+                    entity.Property(g => g.GenreId).HasColumnName("genreId");
+                    entity.Property(g => g.GenreName).HasColumnName("genreName");
+                });
 
-                modelBuilder.Entity<MovieGenre>()
-                    .HasOne(mg => mg.Genres)
-                    .WithMany(g => g.MovieGenres)
-                    .HasForeignKey(mg => mg.GenreId);
+                // MovieGenres table mapping
+                modelBuilder.Entity<MovieGenre>(entity =>
+                {
+                    entity.ToTable("MovieGenres");
+                    entity.HasKey(mg => new { mg.Tconst, mg.GenreId });
+                    entity.HasOne(mg => mg.Movies)
+                          .WithMany(m => m.MovieGenres)
+                          .HasForeignKey(mg => mg.Tconst);
+                    entity.HasOne(mg => mg.Genres)
+                          .WithMany(g => g.MovieGenres)
+                          .HasForeignKey(mg => mg.GenreId);
+                });
 
-                // MovieDirector: 联合主键
-                modelBuilder.Entity<MovieDirector>()
-                    .HasKey(md => new { md.Tconst, md.Nconst });
+                // MovieDirectors table mapping
+                modelBuilder.Entity<MovieDirector>(entity =>
+                {
+                    entity.ToTable("MovieDirectors");
+                    entity.HasKey(md => new { md.Tconst, md.Nconst });
+                    entity.HasOne(md => md.Movies)
+                          .WithMany(m => m.MovieDirectors)
+                          .HasForeignKey(md => md.Tconst);
+                    entity.HasOne(md => md.People)
+                          .WithMany(p => p.MovieDirectors)
+                          .HasForeignKey(md => md.Nconst);
+                });
 
-                modelBuilder.Entity<MovieDirector>()
-                    .HasOne(md => md.Movies)
-                    .WithMany(m => m.MovieDirectors)
-                    .HasForeignKey(md => md.Tconst);
-
-                modelBuilder.Entity<MovieDirector>()
-                    .HasOne(md => md.People)
-                    .WithMany(p => p.MovieDirectors)
-                    .HasForeignKey(md => md.Nconst);
-
-                // MovieWriter: 联合主键
-                modelBuilder.Entity<MovieWriter>()
-                    .HasKey(mw => new { mw.Tconst, mw.Nconst });
-
-                modelBuilder.Entity<MovieWriter>()
-                    .HasOne(mw => mw.Movies)
-                    .WithMany(m => m.MovieWriters)
-                    .HasForeignKey(mw => mw.Tconst);
-
-                modelBuilder.Entity<MovieWriter>()
-                    .HasOne(mw => mw.People)
-                    .WithMany(p => p.MovieWriters)
-                    .HasForeignKey(mw => mw.Nconst);
+                // MovieWriters table mapping
+                modelBuilder.Entity<MovieWriter>(entity =>
+                {
+                    entity.ToTable("MovieWriters");
+                    entity.HasKey(mw => new { mw.Tconst, mw.Nconst });
+                    entity.HasOne(mw => mw.Movies)
+                          .WithMany(m => m.MovieWriters)
+                          .HasForeignKey(mw => mw.Tconst);
+                    entity.HasOne(mw => mw.People)
+                          .WithMany(p => p.MovieWriters)
+                          .HasForeignKey(mw => mw.Nconst);
+                });
             }
+
+
         }
-    }
-
-
-}
+   }

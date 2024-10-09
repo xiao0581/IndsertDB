@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace IndsertDB.Model
 {
-    [Table("Genres")]
+   
     public class Genre
     {
-        [Key]  // 主键
+    
         public int GenreId { get; set; }
 
         public string GenreName { get; set; }

@@ -9,10 +9,10 @@ namespace IndsertDB.Model
 {
     
 
-    [Table("Movies")]
+
     public class Movie
     {
-        [Key]
+
         public string Tconst { get; set; }  // 主键
 
         public string TitleType { get; set; }

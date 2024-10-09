@@ -1,6 +1,6 @@
 ﻿using EFCore.BulkExtensions;
 using IndsertDB.Model;
-using IndsertDB.Model.IndsertDB.Model;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +17,9 @@ namespace IndsertDB
             var professionsList = new List<Profession>();
             var personProfessionsList = new List<PersonProfession>();
             var knownForList = new List<KnownFor>();
+
+            // 使用字典保存 Person 和 ProfessionName 的映射
+            var personToProfessionNames = new Dictionary<string, List<string>>();
 
             using (var reader = new StreamReader(filePath))
             {
@@ -58,16 +61,14 @@ namespace IndsertDB
                                     ProfessionName = professionName
                                 };
                                 professionsList.Add(newProfession);
-                                existingProfession = newProfession; // 为 personProfessionsList 做准备
                             }
 
-                            // 将 person-profession 关系添加到 personProfessionsList
-                            var personProfession = new PersonProfession
+                            // 将 person 与 professionName 的关系保存到字典中
+                            if (!personToProfessionNames.ContainsKey(person.Nconst))
                             {
-                                Nconst = person.Nconst,
-                                ProfessionId = existingProfession.ProfessionId // 此时 professionId 应为 Auto-Increment 处理
-                            };
-                            personProfessionsList.Add(personProfession);
+                                personToProfessionNames[person.Nconst] = new List<string>();
+                            }
+                            personToProfessionNames[person.Nconst].Add(professionName);
                         }
                     }
 
@@ -94,13 +95,62 @@ namespace IndsertDB
             // 使用 BulkInsert 插入数据库
             using (var context = new ImdbDbContext())
             {
-                context.BulkInsert(peopleList);  // 插入 people 数据
-                Console.WriteLine($" people into the database");
-                context.BulkInsert(professionsList);  // 插入 professions 数据
-                context.BulkInsert(personProfessionsList);  // 插入 person-professions 关系数据
-                context.BulkInsert(knownForList);  // 插入 knownFor 数据
+                // 插入 people 数据
+                context.BulkInsert(peopleList);
+                Console.WriteLine($"People inserted into the database.");
+
+                // 插入 professionsList 并确保 professionId 已生成
+                context.BulkInsert(professionsList);
+                Console.WriteLine("Professions inserted into the database.");
+
+                // 从数据库中重新读取 professionsList，以确保 professionId 正确更新
+                var updatedProfessionsList = context.Professions.ToList();
+
+                // 遍历字典以更新 personProfessionsList 中 professionId 的值
+                foreach (var kvp in personToProfessionNames)
+                {
+                    var nconst = kvp.Key;
+                    var professionNames = kvp.Value;
+
+                    foreach (var professionName in professionNames)
+                    {
+                        // 在 updatedProfessionsList 中找到对应的 profession
+                        var profession = updatedProfessionsList.FirstOrDefault(p => p.ProfessionName == professionName);
+                        if (profession != null)
+                        {
+                            // 检查 personProfessionsList 中是否已经存在相同的 Nconst 和 ProfessionId
+                            if (!personProfessionsList.Any(pp => pp.Nconst == nconst && pp.ProfessionId == profession.ProfessionId))
+                            {
+                                var personProfession = new PersonProfession
+                                {
+                                    Nconst = nconst,
+                                    ProfessionId = profession.ProfessionId // 使用数据库中的 ProfessionId
+                                };
+                                personProfessionsList.Add(personProfession);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Could not find Profession with ProfessionName '{professionName}' in updatedProfessionsList.");
+                        }
+                    }
+                }
+                foreach (var personProfession in personProfessionsList)
+                {
+                    Console.WriteLine($"PersonProfession - Nconst: {personProfession.Nconst}, ProfessionId: {personProfession.ProfessionId}");
+                }
+                // 插入 person-professions 关系数据
+                context.BulkInsert(personProfessionsList);
+                Console.WriteLine("Person-Professions inserted into the database.");
+
+                // 插入 knownFor 数据
+                context.BulkInsert(knownForList);
+                Console.WriteLine("KnownFor inserted into the database.");
             }
         }
+
+
+
 
 
 
@@ -109,6 +159,7 @@ namespace IndsertDB
             var moviesList = new List<Movie>();
             var genresList = new List<Genre>();
             var movieGenresList = new List<MovieGenre>();
+            var movieToGenreName = new Dictionary<string, List<string>>();
 
             using (var reader = new StreamReader(filePath))
             {

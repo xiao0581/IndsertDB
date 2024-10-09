@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace IndsertDB.Model
 {
-    [Table("PersonProfessions")]
+   
     public class PersonProfession
     {
-        [ForeignKey("People")]
+        [Column("nconst")]
         public string Nconst { get; set; }  // 外键
 
-        [ForeignKey("Professions")]
+        [Column("professionId")]
         public int ProfessionId { get; set; }  // 外键
 
         public virtual People People { get; set; }
-        public virtual Profession Professions { get; set; }
+        public virtual Profession Profession { get; set; }
     }
 }

@@ -8,17 +8,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace IndsertDB.Model
 {
 
-    [Table("KnownFors")]
+
     public class KnownFor
     {
-        [ForeignKey("People")]
+        [Column("nconst")]
         public string Nconst { get; set; }  // 外键
 
-        [ForeignKey("Movies")]
+        [Column("tconst")]
         public string Tconst { get; set; }  // 外键
 
         public virtual People People { get; set; }
-        public virtual Movie Movies { get; set; }
+        public virtual Movie Movie { get; set; }
     }
 
 

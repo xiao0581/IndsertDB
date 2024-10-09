@@ -2,6 +2,7 @@
 using IndsertDB.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using ImdbRestApi.Dto;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,8 +12,7 @@ namespace ImdbRestApi.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
-     
-        // GET: api/<MoviesController>
+
         [HttpGet("searchByTittle")]
         public async Task<IActionResult> SearchMovies(string tittle)
         {
@@ -20,11 +20,41 @@ namespace ImdbRestApi.Controllers
             {
                 var searchParam = new SqlParameter("@searchPattern", $"%{tittle}%");
 
-                var movies = await context.Movies
-                    .FromSqlRaw("EXEC SearchMoviesByTitle @searchPattern", tittle)
-                    .ToListAsync();
+                using (var connection = context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "SearchMoviesByTitle";
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.Parameters.Add(searchParam);
 
-                return Ok(movies);
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            var movies = new List<MovieDto>();
+
+                            while (await reader.ReadAsync())
+                            {
+                                var movie = new MovieDto
+                                {
+                                    Tconst = reader["tconst"].ToString(),
+                                    TitleType = reader["titleType"].ToString(),
+                                    PrimaryTitle = reader["primaryTitle"].ToString(),
+                                    OriginalTitle = reader["originalTitle"].ToString(),
+                                    IsAdult = Convert.ToBoolean(reader["isAdult"]),
+                                    StartYear = reader["startYear"] != DBNull.Value ? (int?)reader["startYear"] : null,
+                                    EndYear = reader["endYear"] != DBNull.Value ? (int?)reader["endYear"] : null,
+                                    RuntimeMinutes = reader["runtimeMinutes"] != DBNull.Value ? (int?)reader["runtimeMinutes"] : null,
+                                    GenreName = reader["GenreName"].ToString()
+                                };
+
+                                movies.Add(movie);
+                            }
+
+                            return Ok(movies);
+                        }
+                    }
+                }
             }
         }
         [HttpGet("searchByName")]
@@ -32,13 +62,43 @@ namespace ImdbRestApi.Controllers
         {
             using (var context = new ImdbDbContext())
             {
-                var searchParam = new SqlParameter("@searchPattern", $"%{person}%");
+                var searchParam = new SqlParameter("@namePattern", $"%{person}%");
 
-                var persons = await context.Movies
-                    .FromSqlRaw("EXEC SearchPeopleWithDetails  @searchPattern", searchParam)
-                    .ToListAsync();
+                // 手动创建连接并执行存储过程
+                using (var connection = context.Database.GetDbConnection())
+                {
+                    await connection.OpenAsync();
 
-                return Ok(persons);
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "GetPersonDetails";
+                        command.CommandType = System.Data.CommandType.StoredProcedure;
+                        command.Parameters.Add(searchParam);
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            var results = new List<PersonDetailsDto>();
+
+                            // 手动将结果映射到 DTO
+                            while (await reader.ReadAsync())
+                            {
+                                var dto = new PersonDetailsDto
+                                {
+                                    Nconst = reader["nconst"].ToString(),
+                                    PrimaryName = reader["primaryName"].ToString(),
+                                    BirthYear = reader["birthYear"] != DBNull.Value ? (int?)reader["birthYear"] : null,
+                                    DeathYear = reader["deathYear"] != DBNull.Value ? (int?)reader["deathYear"] : null,
+                                    PersonProfessions = reader["personProfessions"].ToString(),
+                                    KnownForTitles = reader["knownForTitles"].ToString()
+                                };
+
+                                results.Add(dto);
+                            }
+
+                            return Ok(results);
+                        }
+                    }
+                }
             }
         }
         // GET api/<MoviesController>/5

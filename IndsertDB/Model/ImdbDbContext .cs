@@ -111,10 +111,10 @@ namespace IndsertDB.Model
                 {
                     entity.ToTable("MovieGenres");
                     entity.HasKey(mg => new { mg.Tconst, mg.GenreId });
-                    entity.HasOne(mg => mg.Movies)
+                    entity.HasOne(mg => mg.Movie)
                           .WithMany(m => m.MovieGenres)
                           .HasForeignKey(mg => mg.Tconst);
-                    entity.HasOne(mg => mg.Genres)
+                    entity.HasOne(mg => mg.Genre)
                           .WithMany(g => g.MovieGenres)
                           .HasForeignKey(mg => mg.GenreId);
                 });
@@ -124,7 +124,7 @@ namespace IndsertDB.Model
                 {
                     entity.ToTable("MovieDirectors");
                     entity.HasKey(md => new { md.Tconst, md.Nconst });
-                    entity.HasOne(md => md.Movies)
+                    entity.HasOne(md => md.Movie)
                           .WithMany(m => m.MovieDirectors)
                           .HasForeignKey(md => md.Tconst);
                     entity.HasOne(md => md.People)
@@ -137,7 +137,7 @@ namespace IndsertDB.Model
                 {
                     entity.ToTable("MovieWriters");
                     entity.HasKey(mw => new { mw.Tconst, mw.Nconst });
-                    entity.HasOne(mw => mw.Movies)
+                    entity.HasOne(mw => mw.Movie)
                           .WithMany(m => m.MovieWriters)
                           .HasForeignKey(mw => mw.Tconst);
                     entity.HasOne(mw => mw.People)

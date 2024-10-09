@@ -12,7 +12,7 @@ string crewFilePath = @"C:\Users\xiao\Desktop\sql\title.crew.tsv";
 
 try
 {
-    // 检查文件是否存在
+   
     if (File.Exists(peopleFilePath))
     {
         insert.BulkInsertPeople(peopleFilePath);

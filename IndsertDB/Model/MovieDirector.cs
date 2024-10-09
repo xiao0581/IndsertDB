@@ -11,13 +11,13 @@ namespace IndsertDB.Model
   
     public class MovieDirector
     {
-       
+        [Column("tconst")]
         public string Tconst { get; set; }  // 外键
 
-       
+        [Column("nconst")]
         public string Nconst { get; set; }  // 外键
 
-        public virtual Movie Movies { get; set; }
+        public virtual Movie Movie { get; set; }
         public virtual People People { get; set; }
     }
 

@@ -159,14 +159,19 @@ namespace IndsertDB
             var moviesList = new List<Movie>();
             var genresList = new List<Genre>();
             var movieGenresList = new List<MovieGenre>();
-            var movieToGenreName = new Dictionary<string, List<string>>();
+
+            // 使用字典保存 Movie 和 GenreName 的映射
+            var movieToGenreNames = new Dictionary<string, List<string>>();
 
             using (var reader = new StreamReader(filePath))
             {
                 string line;
                 reader.ReadLine(); // Skip header
 
-                while ((line = reader.ReadLine()) != null)
+                int counter = 0; // 初始化计数器
+                int maxRecords = 10; // 设置最多插入的记录数
+
+                while ((line = reader.ReadLine()) != null && counter < maxRecords)
                 {
                     var fields = line.Split('\t');
                     var movie = new Movie
@@ -182,37 +187,92 @@ namespace IndsertDB
                     };
                     Console.WriteLine($"Inserting Movie: Tconst = {movie.Tconst}, TitleType = {movie.TitleType}, PrimaryTitle = {movie.PrimaryTitle}, OriginalTitle = {movie.OriginalTitle}, IsAdult = {movie.IsAdult}");
 
+                    // Add movie to the list
                     moviesList.Add(movie);
 
-                    // 处理 Genre
-                    var genres = fields[8].Split(',');
-                    foreach (var genre in genres)
+                    // 处理 genres 字段
+                    if (fields.Length > 8 && !string.IsNullOrWhiteSpace(fields[8]))
                     {
-                        var existingGenre = genresList.FirstOrDefault(g => g.GenreName == genre);
-                        if (existingGenre == null)
-                        {
-                            var newGenre = new Genre { GenreName = genre };
-                            genresList.Add(newGenre);
-                            existingGenre = newGenre;
-                        }
-                        movieGenresList.Add(new MovieGenre
-                        {
-                            Tconst = movie.Tconst,
-                            GenreId = existingGenre.GenreId
-                        });
-                        Console.WriteLine($"Inserting MovieGenre: Tconst = {movie.Tconst}, GenreId = {existingGenre.GenreId}");
+                        var genres = fields[8].Split(',');
 
+                        foreach (var genreName in genres)
+                        {
+                            var existingGenre = genresList.FirstOrDefault(g => g.GenreName == genreName);
+
+                            // 如果 genresList 中不存在该 genre，则创建并添加
+                            if (existingGenre == null)
+                            {
+                                var newGenre = new Genre
+                                {
+                                    GenreName = genreName
+                                };
+                                genresList.Add(newGenre);
+                            }
+
+                            // 将 movie 与 genreName 的关系保存到字典中
+                            if (!movieToGenreNames.ContainsKey(movie.Tconst))
+                            {
+                                movieToGenreNames[movie.Tconst] = new List<string>();
+                            }
+                            movieToGenreNames[movie.Tconst].Add(genreName);
+                        }
                     }
+
+                    counter++; // 递增计数器
                 }
             }
-            Console.WriteLine($"Inserting {moviesList.Count} movies and {movieGenresList.Count} movie genres into the database");
 
             using (var context = new ImdbDbContext())
             {
-                // 确保只插入实际表列
+                // 插入 movies 数据
                 context.BulkInsert(moviesList);
+                Console.WriteLine($"Movies inserted into the database.");
+
+                // 插入 genresList 并确保 GenreId 已生成
                 context.BulkInsert(genresList);
+                Console.WriteLine("Genres inserted into the database.");
+
+                // 从数据库中重新读取 genresList，以确保 GenreId 正确更新
+                var updatedGenresList = context.Genres.ToList();
+
+                // 遍历字典以更新 movieGenresList 中 GenreId 的值
+                foreach (var kvp in movieToGenreNames)
+                {
+                    var tconst = kvp.Key;
+                    var genreNames = kvp.Value;
+
+                    foreach (var genreName in genreNames)
+                    {
+                        // 在 updatedGenresList 中找到对应的 genre
+                        var genre = updatedGenresList.FirstOrDefault(g => g.GenreName == genreName);
+                        if (genre != null)
+                        {
+                            // 检查 movieGenresList 中是否已经存在相同的 Tconst 和 GenreId
+                            if (!movieGenresList.Any(mg => mg.Tconst == tconst && mg.GenreId == genre.GenreId))
+                            {
+                                var movieGenre = new MovieGenre
+                                {
+                                    Tconst = tconst,
+                                    GenreId = genre.GenreId // 使用数据库中的 GenreId
+                                };
+                                movieGenresList.Add(movieGenre);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Warning: Could not find Genre with GenreName '{genreName}' in updatedGenresList.");
+                        }
+                    }
+                }
+
+                foreach (var movieGenre in movieGenresList)
+                {
+                    Console.WriteLine($"MovieGenre - Tconst: {movieGenre.Tconst}, GenreId: {movieGenre.GenreId}");
+                }
+
+                // 插入 movie-genres 关系数据
                 context.BulkInsert(movieGenresList);
+                Console.WriteLine("Movie-Genres inserted into the database.");
             }
         }
 
@@ -226,43 +286,59 @@ namespace IndsertDB
                 string line;
                 reader.ReadLine(); // Skip header
 
-                while ((line = reader.ReadLine()) != null)
+                int counter = 0; // 初始化计数器
+                int maxRecords = 10; // 设置最多插入的记录数
+
+                while ((line = reader.ReadLine()) != null && counter < maxRecords)
                 {
                     var fields = line.Split('\t');
-                    var tconst = fields[0];
+                    var tconst = fields[0]; // movie ID (tconst)
 
-                    // 处理 Directors
-                    if (fields[1] != "\\N")
+                    // 处理 directors 字段
+                    if (!string.IsNullOrWhiteSpace(fields[1]) && fields[1] != "\\N")
                     {
                         var directors = fields[1].Split(',');
                         foreach (var director in directors)
                         {
-                            movieDirectorsList.Add(new MovieDirector { Tconst = tconst, Nconst = director });
-                            Console.WriteLine($"Inserting MovieDirector: Tconst = {tconst}, Nconst = {director}");
-
+                            var movieDirector = new MovieDirector
+                            {
+                                Tconst = tconst,
+                                Nconst = director
+                            };
+                            movieDirectorsList.Add(movieDirector);
+                            Console.WriteLine($"Inserting MovieDirector: Tconst = {movieDirector.Tconst}, Nconst = {movieDirector.Nconst}");
                         }
                     }
 
-                    // 处理 Writers
-                    if (fields[2] != "\\N")
+                    // 处理 writers 字段
+                    if (!string.IsNullOrWhiteSpace(fields[2]) && fields[2] != "\\N")
                     {
                         var writers = fields[2].Split(',');
                         foreach (var writer in writers)
                         {
-                            movieWritersList.Add(new MovieWriter { Tconst = tconst, Nconst = writer });
-                            Console.WriteLine($"Inserting MovieWriter: Tconst = {tconst}, Nconst = {writer}");
-
+                            var movieWriter = new MovieWriter
+                            {
+                                Tconst = tconst,
+                                Nconst = writer
+                            };
+                            movieWritersList.Add(movieWriter);
+                            Console.WriteLine($"Inserting MovieWriter: Tconst = {movieWriter.Tconst}, Nconst = {movieWriter.Nconst}");
                         }
                     }
+
+                    counter++; // 递增计数器
                 }
             }
-            Console.WriteLine($"Inserting {movieDirectorsList.Count} movie directors and {movieWritersList.Count} movie writers into the database");
 
             using (var context = new ImdbDbContext())
             {
-                // 确保只插入实际表列
+                // 插入 movieDirectorsList 数据
                 context.BulkInsert(movieDirectorsList);
+                Console.WriteLine($"MovieDirectors inserted into the database.");
+
+                // 插入 movieWritersList 数据
                 context.BulkInsert(movieWritersList);
+                Console.WriteLine("MovieWriters inserted into the database.");
             }
         }
 

@@ -23,7 +23,11 @@ namespace IndsertDB.Model
             public DbSet<MovieDirector> MovieDirectors { get; set; }
             public DbSet<MovieWriter> MovieWriters { get; set; }
 
-            protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public ImdbDbContext()
+        {
+        }
+        public ImdbDbContext(DbContextOptions<ImdbDbContext> options) : base(options) { }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
                 if (!optionsBuilder.IsConfigured)
                 {

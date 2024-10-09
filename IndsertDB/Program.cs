@@ -1,18 +1,18 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
 using IndsertDB;
 
 Console.WriteLine("Hello, World!");
-// 创建 Insert 类的实例
+
 Insert insert = new Insert();
 
-// 定义数据文件的路径 (确保你指定了正确的文件路径)
+
 string peopleFilePath = @"C:\Users\xiao\Desktop\sql\name.basics.tsv";
 string moviesFilePath = @"C:\Users\xiao\Desktop\sql\title.basics.tsv";
 string crewFilePath = @"C:\Users\xiao\Desktop\sql\title.crew.tsv";
 
 try
 {
-   
+
     if (File.Exists(peopleFilePath))
     {
         insert.BulkInsertPeople(peopleFilePath);
@@ -45,7 +45,7 @@ try
 }
 catch (Exception ex)
 {
-    // 捕获并显示插入过程中发生的任何错误
+   
     Console.WriteLine($"An error occurred during data insertion: {ex.Message}");
 }
 

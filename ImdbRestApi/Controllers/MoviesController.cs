@@ -47,7 +47,7 @@ namespace ImdbRestApi.Controllers
             return Ok(people);
         }
 
-        [HttpPost("addMovie")]
+        [HttpPost]
         public async Task<IActionResult> AddMovie([FromBody] MovieDto movieDto)
         {
             await _movieRepository.AddMovie(movieDto);

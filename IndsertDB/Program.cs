@@ -1,14 +1,14 @@
 ﻿
 using IndsertDB;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("starting insert!");
 
 Insert insert = new Insert();
 
 
-string peopleFilePath = @"C:\Users\xiao\Desktop\sql\name.basics.tsv";
-string moviesFilePath = @"C:\Users\xiao\Desktop\sql\title.basics.tsv";
-string crewFilePath = @"C:\Users\xiao\Desktop\sql\title.crew.tsv";
+string peopleFilePath = @"C:\Users\xiaohui\Desktop\4.Sql\name.basics.tsv";
+string moviesFilePath = @"C:\Users\xiaohui\Desktop\4.Sql\title.basics.tsv";
+string crewFilePath = @"C:\Users\xiaohui\Desktop\4.Sql\title.crew.tsv";
 
 try
 {

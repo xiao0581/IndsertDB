@@ -12,7 +12,7 @@ namespace IndsertDB
     public class Insert
     {
         public void BulkInsertPeople(string filePath)
-        {
+        {  
             var peopleList = new List<People>();
             var professionsList = new List<Profession>();
             var personProfessionsList = new List<PersonProfession>();
@@ -27,7 +27,7 @@ namespace IndsertDB
                 reader.ReadLine(); // Skip header
 
                 int counter = 0; // 初始化计数器
-                int maxRecords = 10; // 设置最多插入的记录数
+                int maxRecords = 60000; // 设置最多插入的记录数
 
                 while ((line = reader.ReadLine()) != null && counter < maxRecords)
                 {
@@ -39,7 +39,7 @@ namespace IndsertDB
                         BirthYear = fields[2] == "\\N" ? null : (int?)int.Parse(fields[2]),
                         DeathYear = fields[3] == "\\N" ? null : (int?)int.Parse(fields[3])
                     };
-                    Console.WriteLine($"Inserting Person: Nconst = {person.Nconst}, PrimaryName = {person.PrimaryName}, BirthYear = {person.BirthYear}, DeathYear = {person.DeathYear}");
+                   
 
                     // Add to people list
                     peopleList.Add(person);
@@ -95,6 +95,7 @@ namespace IndsertDB
             // 使用 BulkInsert 插入数据库
             using (var context = new ImdbDbContext())
             {
+              
                 // 插入 people 数据
                 context.BulkInsert(peopleList);
                 Console.WriteLine($"People inserted into the database.");
@@ -135,10 +136,7 @@ namespace IndsertDB
                         }
                     }
                 }
-                foreach (var personProfession in personProfessionsList)
-                {
-                    Console.WriteLine($"PersonProfession - Nconst: {personProfession.Nconst}, ProfessionId: {personProfession.ProfessionId}");
-                }
+               
                 // 插入 person-professions 关系数据
                 context.BulkInsert(personProfessionsList);
                 Console.WriteLine("Person-Professions inserted into the database.");
@@ -169,7 +167,7 @@ namespace IndsertDB
                 reader.ReadLine(); // Skip header
 
                 int counter = 0; // 初始化计数器
-                int maxRecords = 10; // 设置最多插入的记录数
+                int maxRecords = 60000; // 设置最多插入的记录数
 
                 while ((line = reader.ReadLine()) != null && counter < maxRecords)
                 {
@@ -185,7 +183,7 @@ namespace IndsertDB
                         EndYear = fields[6] == "\\N" ? null : (int?)int.Parse(fields[6]),
                         RuntimeMinutes = fields[7] == "\\N" ? null : (int?)int.Parse(fields[7])
                     };
-                    Console.WriteLine($"Inserting Movie: Tconst = {movie.Tconst}, TitleType = {movie.TitleType}, PrimaryTitle = {movie.PrimaryTitle}, OriginalTitle = {movie.OriginalTitle}, IsAdult = {movie.IsAdult}");
+                   
 
                     // Add movie to the list
                     moviesList.Add(movie);
@@ -224,6 +222,8 @@ namespace IndsertDB
 
             using (var context = new ImdbDbContext())
             {
+               
+
                 // 插入 movies 数据
                 context.BulkInsert(moviesList);
                 Console.WriteLine($"Movies inserted into the database.");
@@ -265,10 +265,7 @@ namespace IndsertDB
                     }
                 }
 
-                foreach (var movieGenre in movieGenresList)
-                {
-                    Console.WriteLine($"MovieGenre - Tconst: {movieGenre.Tconst}, GenreId: {movieGenre.GenreId}");
-                }
+              
 
                 // 插入 movie-genres 关系数据
                 context.BulkInsert(movieGenresList);
@@ -287,7 +284,7 @@ namespace IndsertDB
                 reader.ReadLine(); // Skip header
 
                 int counter = 0; // 初始化计数器
-                int maxRecords = 10; // 设置最多插入的记录数
+                int maxRecords = 60000; // 设置最多插入的记录数
 
                 while ((line = reader.ReadLine()) != null && counter < maxRecords)
                 {
@@ -306,7 +303,7 @@ namespace IndsertDB
                                 Nconst = director
                             };
                             movieDirectorsList.Add(movieDirector);
-                            Console.WriteLine($"Inserting MovieDirector: Tconst = {movieDirector.Tconst}, Nconst = {movieDirector.Nconst}");
+                            
                         }
                     }
 
@@ -322,7 +319,7 @@ namespace IndsertDB
                                 Nconst = writer
                             };
                             movieWritersList.Add(movieWriter);
-                            Console.WriteLine($"Inserting MovieWriter: Tconst = {movieWriter.Tconst}, Nconst = {movieWriter.Nconst}");
+                            
                         }
                     }
 
@@ -332,6 +329,7 @@ namespace IndsertDB
 
             using (var context = new ImdbDbContext())
             {
+                
                 // 插入 movieDirectorsList 数据
                 context.BulkInsert(movieDirectorsList);
                 Console.WriteLine($"MovieDirectors inserted into the database.");

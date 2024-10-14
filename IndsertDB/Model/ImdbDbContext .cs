@@ -22,7 +22,7 @@ namespace IndsertDB.Model
             public DbSet<MovieGenre> MovieGenres { get; set; }
             public DbSet<MovieDirector> MovieDirectors { get; set; }
             public DbSet<MovieWriter> MovieWriters { get; set; }
-
+             public DbSet<GetByIdView> GetByIdView { get; set; }
         public ImdbDbContext()
         {
         }
@@ -31,7 +31,7 @@ namespace IndsertDB.Model
             {
                 if (!optionsBuilder.IsConfigured)
                 {
-                    optionsBuilder.UseSqlServer("Data Source=DESKTOP-JLQ17VU;Integrated Security=True;Database=xx;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+                    optionsBuilder.UseSqlServer("Data Source=XIAO-PC\\XIAODATA;Integrated Security=True;Database=xx;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
                 }
             }
 
@@ -148,7 +148,13 @@ namespace IndsertDB.Model
                           .WithMany(p => p.MovieWriters)
                           .HasForeignKey(mw => mw.Nconst);
                 });
-            }
+
+            // GetByIdView table mapping
+            modelBuilder
+            .Entity<GetByIdView>()
+            .ToView("GetById") // 
+            .HasNoKey();
+        }
 
 
         }

@@ -13,7 +13,7 @@ namespace IndsertDB.Model
     public class Movie
     {
 
-        public string Tconst { get; set; }  // 主键
+        public string Tconst { get; set; } 
 
         public string TitleType { get; set; }
         public string PrimaryTitle { get; set; }
@@ -23,7 +23,7 @@ namespace IndsertDB.Model
         public int? EndYear { get; set; }
         public int? RuntimeMinutes { get; set; }
 
-        // 关系映射
+     
         public ICollection<MovieGenre> MovieGenres { get; set; }
         public ICollection<KnownFor> KnownForTitles { get; set; }
         public ICollection<MovieDirector> MovieDirectors { get; set; }

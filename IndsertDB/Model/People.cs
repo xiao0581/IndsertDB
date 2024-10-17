@@ -13,7 +13,7 @@ namespace IndsertDB.Model
     public class People
     {
   
-        public string Nconst { get; set; }  // 主键
+        public string Nconst { get; set; }  
 
         public string PrimaryName { get; set; }
         public int? BirthYear { get; set; }

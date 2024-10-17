@@ -6,7 +6,7 @@ using ImdbRestApi.Dto;
 using System.Data.Entity;
 using ImdbRestApi.Model;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 
 namespace ImdbRestApi.Controllers
 {
@@ -90,14 +90,14 @@ namespace ImdbRestApi.Controllers
 
             try
             {
-                // 调用 MovieRepository 中的方法
+               
                 await _movieRepository.DeleteMovieAsync(tconst);
 
                 return Ok(new { Message = "Movie deleted successfully!" });
             }
             catch (Exception ex)
             {
-                // 处理异常并返回错误信息
+           
                 return StatusCode(500, new { Message = "Error occurred while deleting the movie.", Exception = ex.Message });
             }
         }

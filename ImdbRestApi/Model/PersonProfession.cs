@@ -11,10 +11,10 @@ namespace IndsertDB.Model
     public class PersonProfession
     {
         [Column("nconst")]
-        public string Nconst { get; set; }  // 外键
+        public string Nconst { get; set; }  
 
         [Column("professionId")]
-        public int ProfessionId { get; set; }  // 外键
+        public int ProfessionId { get; set; }  
 
         public virtual People People { get; set; }
         public virtual Profession Profession { get; set; }

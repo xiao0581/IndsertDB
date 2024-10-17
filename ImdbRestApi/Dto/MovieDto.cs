@@ -12,7 +12,7 @@
             public int? EndYear { get; set; }
             public int? RuntimeMinutes { get; set; }
 
-            // 这里映射查询的 genreName
+        
             public string? Genres { get; set; }
         
     }

@@ -31,7 +31,7 @@ namespace IndsertDB.Model
             {
                 if (!optionsBuilder.IsConfigured)
                 {
-                    optionsBuilder.UseSqlServer("Data Source=XIAO-PC\\XIAODATA;Integrated Security=True;Database=xx;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+                    optionsBuilder.UseSqlServer("Data Source=XIAO-PC\\XIAODATA;Integrated Security=True;Database=vv;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
                 }
             }
 

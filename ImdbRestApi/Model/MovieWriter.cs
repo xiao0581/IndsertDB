@@ -11,10 +11,10 @@ namespace IndsertDB.Model
     public class MovieWriter
     {
         [Column("tconst")]
-        public string Tconst { get; set; }  // 外键
+        public string Tconst { get; set; } 
 
         [Column("nconst")]
-        public string Nconst { get; set; }  // 外键
+        public string Nconst { get; set; }  
 
         public virtual Movie Movie { get; set; }
         public virtual People People { get; set; }

@@ -11,10 +11,10 @@ namespace IndsertDB.Model
     public class MovieGenre
     {
         [Column("tconst")]
-        public string Tconst { get; set; }  // 外键
+        public string Tconst { get; set; }  
 
         [Column("genreId")]
-        public int GenreId { get; set; }  // 外键
+        public int GenreId { get; set; }  
 
         public virtual Movie Movie { get; set; }
         public virtual Genre Genre { get; set; }

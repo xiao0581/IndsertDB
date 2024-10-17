@@ -18,8 +18,8 @@ namespace ImdbRestApi.Model
 
         public async Task<MovieDto?> GetByIdAsync(string tconst)
         {
-            // 使用 LINQ 查询映射到视图的实体
-            var movie = await _context.GetByIdView // 映射到视图的 DbSet
+          
+            var movie = await _context.GetByIdView 
                 .Where(m => m.Tconst == tconst)
                 .Select(m => new MovieDto
                 {
@@ -156,7 +156,7 @@ namespace ImdbRestApi.Model
                 throw new ArgumentException("tconst cannot be null or empty", nameof(tconst));
             }
 
-            // 获取电影信息
+         
             var movieToUpdate = await GetByIdAsync(tconst);
 
             if (movieToUpdate == null)
@@ -164,7 +164,7 @@ namespace ImdbRestApi.Model
                 throw new Exception($"Movie with tconst {tconst} not found.");
             }
 
-            // 创建存储过程的参数
+        
             var parameters = new[]
             {
         new SqlParameter("@tconst", tconst),
@@ -178,7 +178,7 @@ namespace ImdbRestApi.Model
         new SqlParameter("@genres", movieUpdateDto.Genres ?? (object)DBNull.Value)
     };
 
-            // 执行更新存储过程
+         
             await _context.Database.ExecuteSqlRawAsync(
                 "EXEC UpdateMovieWithGenres @tconst, @titleType, @primaryTitle, @originalTitle, @isAdult, @startYear, @endYear, @runtimeMinutes, @genres",
                 parameters);
@@ -195,15 +195,15 @@ namespace ImdbRestApi.Model
 
             try
             {
-                // 创建 SQL 参数
+             
                 var tconstParam = new SqlParameter("@tconst", tconst);
 
-                // 执行存储过程
+       
                 await _context.Database.ExecuteSqlRawAsync("EXEC DeleteMovie @tconst", tconstParam);
             }
             catch (Exception ex)
             {
-                // 抛出异常以便在调用方法中捕获
+            
                 throw new Exception($"Error deleting movie with tconst: {tconst}", ex);
             }
         }
